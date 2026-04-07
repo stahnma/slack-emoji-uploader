@@ -13,11 +13,13 @@ var supportedExts = map[string]bool{
 	".jpeg": true,
 }
 
+// Entry represents a discovered emoji file.
 type Entry struct {
 	Path string // relative path to the file from the walk root
 	Name string // derived emoji name
 }
 
+// WalkDir recursively finds all supported image files in dir.
 func WalkDir(dir string) ([]Entry, error) {
 	var entries []Entry
 	err := filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
@@ -44,6 +46,8 @@ func WalkDir(dir string) ([]Entry, error) {
 	return entries, err
 }
 
+// EmojiName derives an emoji name from a filename.
+// Strips extension, lowercases, replaces spaces with hyphens.
 func EmojiName(filename string) string {
 	name := strings.TrimSuffix(filename, filepath.Ext(filename))
 	name = strings.ToLower(name)
