@@ -25,7 +25,7 @@ func TestUploadEmoji_Success(t *testing.T) {
 		if r.FormValue("token") == "" {
 			t.Error("missing token")
 		}
-		json.NewEncoder(w).Encode(map[string]interface{}{"ok": true})
+		_ = json.NewEncoder(w).Encode(map[string]interface{}{"ok": true})
 	}))
 	defer server.Close()
 
@@ -43,7 +43,7 @@ func TestUploadEmoji_Success(t *testing.T) {
 
 func TestUploadEmoji_NameTaken(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		json.NewEncoder(w).Encode(map[string]interface{}{
+		_ = json.NewEncoder(w).Encode(map[string]interface{}{
 			"ok":    false,
 			"error": "error_name_taken",
 		})
@@ -71,13 +71,13 @@ func TestUploadEmoji_RateLimit(t *testing.T) {
 		attempts++
 		if attempts < 3 {
 			w.Header().Set("Retry-After", "1")
-			json.NewEncoder(w).Encode(map[string]interface{}{
+			_ = json.NewEncoder(w).Encode(map[string]interface{}{
 				"ok":    false,
 				"error": "ratelimited",
 			})
 			return
 		}
-		json.NewEncoder(w).Encode(map[string]interface{}{"ok": true})
+		_ = json.NewEncoder(w).Encode(map[string]interface{}{"ok": true})
 	}))
 	defer server.Close()
 

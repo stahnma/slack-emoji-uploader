@@ -74,9 +74,15 @@ func (c *Client) doUpload(name string, imageData []byte, filename string) (*Uplo
 	var body bytes.Buffer
 	writer := multipart.NewWriter(&body)
 
-	writer.WriteField("name", name)
-	writer.WriteField("token", c.token)
-	writer.WriteField("mode", "data")
+	if err := writer.WriteField("name", name); err != nil {
+		return nil, fmt.Errorf("write field name: %w", err)
+	}
+	if err := writer.WriteField("token", c.token); err != nil {
+		return nil, fmt.Errorf("write field token: %w", err)
+	}
+	if err := writer.WriteField("mode", "data"); err != nil {
+		return nil, fmt.Errorf("write field mode: %w", err)
+	}
 
 	part, err := writer.CreateFormFile("image", filename)
 	if err != nil {
@@ -85,7 +91,9 @@ func (c *Client) doUpload(name string, imageData []byte, filename string) (*Uplo
 	if _, err := io.Copy(part, bytes.NewReader(imageData)); err != nil {
 		return nil, fmt.Errorf("write image: %w", err)
 	}
-	writer.Close()
+	if err := writer.Close(); err != nil {
+		return nil, fmt.Errorf("close writer: %w", err)
+	}
 
 	req, err := http.NewRequest("POST", c.baseURL+"/api/emoji.add", &body)
 	if err != nil {
@@ -106,7 +114,7 @@ func (c *Client) doUpload(name string, imageData []byte, filename string) (*Uplo
 	if err != nil {
 		return nil, fmt.Errorf("request failed: %w", err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	respBody, err := io.ReadAll(resp.Body)
 	if err != nil {
@@ -140,7 +148,7 @@ func FetchToken(cookie, team string) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("request failed: %w", err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {

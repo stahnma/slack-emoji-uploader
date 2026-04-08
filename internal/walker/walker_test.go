@@ -10,14 +10,26 @@ func setupTestDir(t *testing.T) string {
 	t.Helper()
 	dir := t.TempDir()
 
-	os.WriteFile(filepath.Join(dir, "partyparrot.gif"), []byte("gif"), 0644)
-	os.WriteFile(filepath.Join(dir, "thumbsup.png"), []byte("png"), 0644)
-	os.WriteFile(filepath.Join(dir, "README.md"), []byte("readme"), 0644)
+	if err := os.WriteFile(filepath.Join(dir, "partyparrot.gif"), []byte("gif"), 0644); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(dir, "thumbsup.png"), []byte("png"), 0644); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(dir, "README.md"), []byte("readme"), 0644); err != nil {
+		t.Fatal(err)
+	}
 
 	sub := filepath.Join(dir, "cats")
-	os.Mkdir(sub, 0755)
-	os.WriteFile(filepath.Join(sub, "Cat Wave.png"), []byte("png"), 0644)
-	os.WriteFile(filepath.Join(sub, "cat-thumbsup.jpg"), []byte("jpg"), 0644)
+	if err := os.Mkdir(sub, 0755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(sub, "Cat Wave.png"), []byte("png"), 0644); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(sub, "cat-thumbsup.jpg"), []byte("jpg"), 0644); err != nil {
+		t.Fatal(err)
+	}
 
 	return dir
 }
