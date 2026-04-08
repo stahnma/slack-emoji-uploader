@@ -14,7 +14,7 @@ A CLI tool for bulk-uploading custom emoji to free-tier Slack workspaces. It use
 ## Installation
 
 ```
-go install github.com/stahnma/slack_emoji_uploader@latest
+go install github.com/stahnma/slack-emoji-uploader@latest
 ```
 
 ## Getting Your Slack Credentials

@@ -4,8 +4,8 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
-	"github.com/stahnma/slack_emoji_uploader/internal/state"
-	"github.com/stahnma/slack_emoji_uploader/internal/walker"
+	"github.com/stahnma/slack-emoji-uploader/internal/state"
+	"github.com/stahnma/slack-emoji-uploader/internal/walker"
 )
 
 var statusCmd = &cobra.Command{

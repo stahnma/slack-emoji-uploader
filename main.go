@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/stahnma/slack_emoji_uploader/cmd"
+	"github.com/stahnma/slack-emoji-uploader/cmd"
 )
 
 func main() {

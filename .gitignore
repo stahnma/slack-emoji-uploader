@@ -1,3 +1,4 @@
 .env
 emoji-state.json
 emoji-conflicts.json
+slack_emoji_uploader

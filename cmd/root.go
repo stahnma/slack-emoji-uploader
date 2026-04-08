@@ -7,7 +7,7 @@ import (
 
 	"github.com/joho/godotenv"
 	"github.com/spf13/cobra"
-	"github.com/stahnma/slack_emoji_uploader/internal/slack"
+	"github.com/stahnma/slack-emoji-uploader/internal/slack"
 )
 
 var (

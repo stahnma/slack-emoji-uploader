@@ -1,4 +1,4 @@
-module github.com/stahnma/slack_emoji_uploader
+module github.com/stahnma/slack-emoji-uploader
 
 go 1.26.1
 
