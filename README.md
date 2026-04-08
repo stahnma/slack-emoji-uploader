@@ -21,15 +21,39 @@ go install github.com/stahnma/slack_emoji_uploader@latest
 
 This tool authenticates using a browser session token and cookie. You will need three values: a **token**, a **cookie**, and your **team name**.
 
-1. Open your Slack workspace in a browser (e.g., `https://your-team.slack.com`).
+### Getting the token (`xoxc-*`)
+
+1. Open your Slack workspace in a browser (e.g., `https://app.slack.com`).
 2. Open browser DevTools (F12, or Cmd+Option+I on Mac).
-3. Go to the **Network** tab.
-4. Navigate to `https://your-team.slack.com/customize/emoji`.
-5. In the Network tab, look for any request to an `/api/` endpoint (like `emoji.adminList` or `client.boot`).
-6. Click the request and look in the **Request Payload** or **Form Data** for a value starting with `xoxc-` -- that is your token.
-7. Go to the **Application** tab, then **Cookies**, then your Slack domain. Find the cookie named `d` and copy its value.
-8. Your team name is the subdomain of your Slack URL. For example, if your workspace is at `mycompany.slack.com`, the team is `mycompany`.
-9. Create a `.env` file in the directory where you run the tool with these values (see below).
+3. Go to the **Console** tab.
+4. In Chrome, you may need to type `allow pasting` and press Enter first.
+5. Paste this snippet and press Enter:
+
+```javascript
+JSON.parse(localStorage.getItem('localConfig_v2')).teams[JSON.parse(localStorage.getItem('localConfig_v2')).lastActiveTeamId].token
+```
+
+6. Copy the `xoxc-*` value that is returned -- that is your token.
+
+To see tokens for all your workspaces, use this instead:
+
+```javascript
+Object.entries(JSON.parse(localStorage.localConfig_v2).teams).forEach(([id, t]) => console.log(id, t.name, t.token))
+```
+
+### Getting the cookie (`d`)
+
+7. In DevTools, go to the **Application** tab (Chrome) or **Storage** tab (Firefox).
+8. Expand **Cookies** in the left sidebar, click your Slack domain.
+9. Find the cookie named `d` and copy its value (starts with `xoxd-`).
+
+### Getting your team name
+
+10. Your team name is the subdomain of your Slack URL. For example, if your workspace is at `mycompany.slack.com`, the team is `mycompany`.
+
+### Save your credentials
+
+11. Create a `.env` file in the directory where you run the tool (see below).
 
 ## Configuration
 
@@ -37,7 +61,7 @@ Create a `.env` file in your working directory:
 
 ```
 SLACK_TOKEN=xoxc-your-token-here
-SLACK_COOKIE=your-cookie-value-here
+SLACK_COOKIE=xoxd-your-cookie-value-here
 SLACK_TEAM=your-workspace-name
 ```
 
@@ -82,7 +106,7 @@ slack-emoji-uploader resolve ./emoji/
 | Flag | Scope | Default | Description |
 |------|-------|---------|-------------|
 | `--token` | global | | Slack `xoxc-*` session token |
-| `--cookie` | global | | Slack `d=` session cookie value |
+| `--cookie` | global | | Slack session cookie (value of the `d` cookie) |
 | `--team` | global | | Slack workspace subdomain |
 | `--auto-suffix` | upload | `false` | Append numeric suffix on name conflicts |
 | `--delay` | upload | `1s` | Delay between uploads (e.g., `2s`, `500ms`) |
