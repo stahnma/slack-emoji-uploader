@@ -117,6 +117,10 @@ Upload progress is tracked in `emoji-state.json` so that interrupted runs can be
 
 If Slack rate-limits a request, the tool automatically retries with exponential backoff (2s, 4s, 8s, ..., up to 60s). Retry progress is shown inline. If all retries are exhausted, the emoji is skipped and will be retried on the next run.
 
+## Related Tools
+
+- **[slack-emoji-grabber](https://github.com/stahnma/slack-emoji-grabber)** -- Downloads all custom emoji from a Slack workspace. Use it together with `slack-emoji-uploader` to migrate emoji from one Slack team to another: grab them from the source workspace, then bulk-upload them to the destination.
+
 ## Notes
 
 - Session cookies expire periodically. If you start getting authentication errors, re-extract your `d` cookie from the browser.
