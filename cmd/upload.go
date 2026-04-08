@@ -77,17 +77,17 @@ func runUpload(cmd *cobra.Command, args []string) error {
 		attempted := []string{}
 		success := false
 
+		imageData, err := os.ReadFile(filepath.Join(dir, entry.Path))
+		if err != nil {
+			return fmt.Errorf("reading %s: %w", entry.Path, err)
+		}
+
 		for suffix := 0; suffix < 100; suffix++ {
 			candidateName := name
 			if suffix > 0 {
 				candidateName = fmt.Sprintf("%s%d", name, suffix+1)
 			}
 			attempted = append(attempted, candidateName)
-
-			imageData, err := os.ReadFile(filepath.Join(dir, entry.Path))
-			if err != nil {
-				return fmt.Errorf("reading %s: %w", entry.Path, err)
-			}
 
 			fmt.Printf("Uploading: %s → :%s: ... ", entry.Path, candidateName)
 			result, err := client.UploadEmoji(candidateName, imageData, filepath.Base(entry.Path))
