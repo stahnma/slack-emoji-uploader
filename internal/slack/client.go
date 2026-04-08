@@ -7,6 +7,7 @@ import (
 	"io"
 	"mime/multipart"
 	"net/http"
+	"regexp"
 	"time"
 )
 
@@ -107,6 +108,37 @@ func (c *Client) doUpload(name string, imageData []byte, filename string) (*Uplo
 		return nil, fmt.Errorf("parse response: %w (body: %s)", err, string(respBody))
 	}
 	return &result, nil
+}
+
+// FetchToken derives the xoxc-* API token from the workspace page using the
+// session cookie. This allows users to provide only the cookie and team name.
+func FetchToken(cookie, team string) (string, error) {
+	url := fmt.Sprintf("https://%s.slack.com", team)
+	client := &http.Client{Timeout: 30 * time.Second}
+
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return "", fmt.Errorf("create request: %w", err)
+	}
+	req.Header.Set("Cookie", "d="+cookie)
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return "", fmt.Errorf("request failed: %w", err)
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return "", fmt.Errorf("read response: %w", err)
+	}
+
+	re := regexp.MustCompile(`xoxc-[a-zA-Z0-9-]+`)
+	match := re.Find(body)
+	if match == nil {
+		return "", fmt.Errorf("could not find xoxc-* token in page — cookie may be expired")
+	}
+	return string(match), nil
 }
 
 // Delay returns the configured delay between uploads.

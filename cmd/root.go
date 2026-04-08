@@ -7,6 +7,7 @@ import (
 
 	"github.com/joho/godotenv"
 	"github.com/spf13/cobra"
+	"github.com/stahnma/slack_emoji_uploader/internal/slack"
 )
 
 var (
@@ -48,10 +49,19 @@ func resolveAuth() (token, cookie, team string, err error) {
 	if team == "" {
 		team = os.Getenv("SLACK_TEAM")
 	}
-	if token == "" || cookie == "" || team == "" {
-		return "", "", "", fmt.Errorf("missing required auth: token, cookie, and team must be set via flags, env vars, or .env file")
+	if cookie == "" || team == "" {
+		return "", "", "", fmt.Errorf("missing required auth: cookie and team must be set via flags, env vars, or .env file")
 	}
 	// Strip "d=" prefix if user included it — the client adds it internally
 	cookie = strings.TrimPrefix(cookie, "d=")
+	// Auto-derive token from cookie if not provided
+	if token == "" {
+		fmt.Println("No token provided, fetching from Slack...")
+		token, err = slack.FetchToken(cookie, team)
+		if err != nil {
+			return "", "", "", fmt.Errorf("auto-fetching token: %w", err)
+		}
+		fmt.Println("Token obtained successfully.")
+	}
 	return token, cookie, team, nil
 }

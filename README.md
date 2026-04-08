@@ -19,50 +19,45 @@ go install github.com/stahnma/slack_emoji_uploader@latest
 
 ## Getting Your Slack Credentials
 
-This tool authenticates using a browser session token and cookie. You will need three values: a **token**, a **cookie**, and your **team name**.
-
-### Getting the token (`xoxc-*`)
-
-1. Open your Slack workspace in a browser (e.g., `https://app.slack.com`).
-2. Open browser DevTools (F12, or Cmd+Option+I on Mac).
-3. Go to the **Console** tab.
-4. In Chrome, you may need to type `allow pasting` and press Enter first.
-5. Paste this snippet and press Enter:
-
-```javascript
-JSON.parse(localStorage.getItem('localConfig_v2')).teams[JSON.parse(localStorage.getItem('localConfig_v2')).lastActiveTeamId].token
-```
-
-6. Copy the `xoxc-*` value that is returned -- that is your token.
-
-To see tokens for all your workspaces, use this instead:
-
-```javascript
-Object.entries(JSON.parse(localStorage.localConfig_v2).teams).forEach(([id, t]) => console.log(id, t.name, t.token))
-```
+This tool authenticates using a browser session cookie. You only need two values: your **cookie** and **team name**. The API token is derived automatically.
 
 ### Getting the cookie (`d`)
 
-7. In DevTools, go to the **Application** tab (Chrome) or **Storage** tab (Firefox).
-8. Expand **Cookies** in the left sidebar, click your Slack domain.
-9. Find the cookie named `d` and copy its value (starts with `xoxd-`).
+1. Open your Slack workspace in a browser (e.g., `https://app.slack.com`).
+2. Open browser DevTools (F12, or Cmd+Option+I on Mac).
+3. Go to the **Application** tab (Chrome) or **Storage** tab (Firefox).
+4. Expand **Cookies** in the left sidebar, click your Slack domain.
+5. Find the cookie named `d` and copy its value (starts with `xoxd-`).
 
 ### Getting your team name
 
-10. Your team name is the subdomain of your Slack URL. For example, if your workspace is at `mycompany.slack.com`, the team is `mycompany`.
+6. Your team name is the subdomain of your Slack URL. For example, if your workspace is at `mycompany.slack.com`, the team is `mycompany`.
 
 ### Save your credentials
 
-11. Create a `.env` file in the directory where you run the tool (see below).
+7. Create a `.env` file in the directory where you run the tool (see below).
+
+### Providing the token manually (optional)
+
+The tool automatically fetches the `xoxc-*` API token using your cookie. If you prefer to provide it manually (e.g., from the browser console), you can set `SLACK_TOKEN` in your `.env` file or pass `--token`. To extract it manually, open the browser console on any Slack page and run:
+
+```javascript
+document.documentElement.innerHTML.match(/xoxc-[a-zA-Z0-9-]+/)[0]
+```
 
 ## Configuration
 
 Create a `.env` file in your working directory:
 
 ```
-SLACK_TOKEN=xoxc-your-token-here
 SLACK_COOKIE=xoxd-your-cookie-value-here
 SLACK_TEAM=your-workspace-name
+```
+
+Optionally, you can also set the token explicitly:
+
+```
+SLACK_TOKEN=xoxc-your-token-here
 ```
 
 Values can also be set via CLI flags (`--token`, `--cookie`, `--team`) or environment variables (`SLACK_TOKEN`, `SLACK_COOKIE`, `SLACK_TEAM`). Flags take precedence over environment variables, which take precedence over the `.env` file.
@@ -105,7 +100,7 @@ slack-emoji-uploader resolve ./emoji/
 
 | Flag | Scope | Default | Description |
 |------|-------|---------|-------------|
-| `--token` | global | | Slack `xoxc-*` session token |
+| `--token` | global | | Slack `xoxc-*` session token (auto-derived if omitted) |
 | `--cookie` | global | | Slack session cookie (value of the `d` cookie) |
 | `--team` | global | | Slack workspace subdomain |
 | `--auto-suffix` | upload | `false` | Append numeric suffix on name conflicts |
@@ -120,5 +115,5 @@ Upload progress is tracked in `emoji-state.json` so that interrupted runs can be
 
 ## Notes
 
-- Session tokens (`xoxc-*`) and cookies expire periodically. If you start getting authentication errors, re-extract your token and cookie from the browser.
+- Session cookies expire periodically. If you start getting authentication errors, re-extract your `d` cookie from the browser.
 - Be respectful of rate limits. The default 1-second delay between uploads is a reasonable starting point. Increasing the delay with `--delay` is recommended if you are uploading a large batch.
