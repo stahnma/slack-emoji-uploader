@@ -60,6 +60,7 @@ func (c *Client) UploadEmoji(name string, imageData []byte, filename string) (*U
 		if attempt == maxRetries {
 			return result, nil
 		}
+		fmt.Printf("rate limited, retrying in %s... ", backoff)
 		time.Sleep(backoff)
 		backoff *= 2
 		if backoff > 60*time.Second {
