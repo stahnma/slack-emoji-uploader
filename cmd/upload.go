@@ -16,19 +16,23 @@ var (
 	flagAutoSuffix bool
 	flagDelay      time.Duration
 	flagDryRun     bool
+	flagVerbose    bool
 )
 
 var uploadCmd = &cobra.Command{
-	Use:   "upload <directory>",
-	Short: "Upload emoji from a directory to Slack",
-	Args:  cobra.ExactArgs(1),
-	RunE:  runUpload,
+	Use:           "upload <directory>",
+	Short:         "Upload emoji from a directory to Slack",
+	Args:          cobra.ExactArgs(1),
+	RunE:          runUpload,
+	SilenceUsage:  true,
+	SilenceErrors: true,
 }
 
 func init() {
 	uploadCmd.Flags().BoolVar(&flagAutoSuffix, "auto-suffix", false, "Automatically append numeric suffix on name conflicts")
 	uploadCmd.Flags().DurationVar(&flagDelay, "delay", 1*time.Second, "Delay between uploads")
 	uploadCmd.Flags().BoolVar(&flagDryRun, "dry-run", false, "Show what would be uploaded without uploading")
+	uploadCmd.Flags().BoolVar(&flagVerbose, "verbose", false, "Show detailed request/response info")
 	rootCmd.AddCommand(uploadCmd)
 }
 
@@ -70,6 +74,7 @@ func runUpload(cmd *cobra.Command, args []string) error {
 	}
 
 	client := slack.NewClient(token, cookie, team, flagDelay)
+	client.Verbose = flagVerbose
 
 	var uploaded, skipped, conflicted int
 

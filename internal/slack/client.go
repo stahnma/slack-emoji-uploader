@@ -26,6 +26,7 @@ type Client struct {
 	baseURL     string
 	baseBackoff time.Duration
 	httpClient  *http.Client
+	Verbose     bool
 }
 
 // NewClient creates a Slack client. The cookie parameter should be the raw
@@ -91,6 +92,14 @@ func (c *Client) doUpload(name string, imageData []byte, filename string) (*Uplo
 	}
 	req.Header.Set("Content-Type", writer.FormDataContentType())
 	req.Header.Set("Cookie", "d="+c.cookie)
+	req.Header.Set("Origin", c.baseURL)
+	req.Header.Set("Referer", c.baseURL+"/customize/emoji")
+
+	if c.Verbose {
+		fmt.Printf("[verbose] POST %s/api/emoji.add\n", c.baseURL)
+		fmt.Printf("[verbose] Token: %s...%s\n", c.token[:10], c.token[len(c.token)-6:])
+		fmt.Printf("[verbose] Cookie: d=%s...%s\n", c.cookie[:10], c.cookie[len(c.cookie)-6:])
+	}
 
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
@@ -101,6 +110,10 @@ func (c *Client) doUpload(name string, imageData []byte, filename string) (*Uplo
 	respBody, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, fmt.Errorf("read response: %w", err)
+	}
+
+	if c.Verbose {
+		fmt.Printf("[verbose] Response: %s\n", string(respBody))
 	}
 
 	var result UploadResult

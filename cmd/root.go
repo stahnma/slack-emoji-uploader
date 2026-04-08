@@ -17,8 +17,10 @@ var (
 )
 
 var rootCmd = &cobra.Command{
-	Use:   "slack-emoji-uploader",
-	Short: "Bulk upload emoji to Slack workspaces",
+	Use:           "slack-emoji-uploader",
+	Short:         "Bulk upload emoji to Slack workspaces",
+	SilenceUsage:  true,
+	SilenceErrors: true,
 }
 
 func Execute() error {
@@ -56,12 +58,13 @@ func resolveAuth() (token, cookie, team string, err error) {
 	cookie = strings.TrimPrefix(cookie, "d=")
 	// Auto-derive token from cookie if not provided
 	if token == "" {
-		fmt.Println("No token provided, fetching from Slack...")
+		fmt.Print("Fetching API token... ")
 		token, err = slack.FetchToken(cookie, team)
 		if err != nil {
+			fmt.Println("failed")
 			return "", "", "", fmt.Errorf("auto-fetching token: %w", err)
 		}
-		fmt.Println("Token obtained successfully.")
+		fmt.Println("ok")
 	}
 	return token, cookie, team, nil
 }
