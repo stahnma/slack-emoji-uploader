@@ -52,10 +52,17 @@ func runUpload(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return fmt.Errorf("loading state: %w", err)
 	}
+	conflicts, err := state.LoadConflicts("emoji-conflicts.json")
+	if err != nil {
+		return fmt.Errorf("loading conflicts: %w", err)
+	}
 
 	if flagDryRun {
 		for _, entry := range entries {
 			if st.IsUploaded(entry.Path) {
+				continue
+			}
+			if _, hasConflict := conflicts.Entries[entry.Path]; hasConflict {
 				continue
 			}
 			fmt.Printf("[dry-run] Would upload: %s → :%s:\n", entry.Path, entry.Name)
@@ -68,11 +75,6 @@ func runUpload(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	conflicts, err := state.LoadConflicts("emoji-conflicts.json")
-	if err != nil {
-		return fmt.Errorf("loading conflicts: %w", err)
-	}
-
 	client := slack.NewClient(token, cookie, team, flagDelay)
 	client.Verbose = flagVerbose
 
@@ -80,6 +82,10 @@ func runUpload(cmd *cobra.Command, args []string) error {
 
 	for _, entry := range entries {
 		if st.IsUploaded(entry.Path) {
+			skipped++
+			continue
+		}
+		if _, hasConflict := conflicts.Entries[entry.Path]; hasConflict {
 			skipped++
 			continue
 		}
