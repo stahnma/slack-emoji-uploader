@@ -29,7 +29,7 @@ func TestUploadEmoji_Success(t *testing.T) {
 	}))
 	defer server.Close()
 
-	c := NewClient("xoxc-test", "d=test", "testteam", 0)
+	c := NewClient("xoxc-test", "testcookie", "testteam", 0)
 	c.baseURL = server.URL
 
 	result, err := c.UploadEmoji("partyparrot", []byte("fake-image"), "partyparrot.gif")
@@ -50,7 +50,7 @@ func TestUploadEmoji_NameTaken(t *testing.T) {
 	}))
 	defer server.Close()
 
-	c := NewClient("xoxc-test", "d=test", "testteam", 0)
+	c := NewClient("xoxc-test", "testcookie", "testteam", 0)
 	c.baseURL = server.URL
 
 	result, err := c.UploadEmoji("partyparrot", []byte("fake-image"), "partyparrot.gif")
@@ -81,7 +81,7 @@ func TestUploadEmoji_RateLimit(t *testing.T) {
 	}))
 	defer server.Close()
 
-	c := NewClient("xoxc-test", "d=test", "testteam", 0)
+	c := NewClient("xoxc-test", "testcookie", "testteam", 0)
 	c.baseURL = server.URL
 	c.baseBackoff = 10 * time.Millisecond
 

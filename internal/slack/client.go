@@ -10,11 +10,13 @@ import (
 	"time"
 )
 
+// UploadResult represents the Slack API response.
 type UploadResult struct {
 	OK    bool   `json:"ok"`
 	Error string `json:"error,omitempty"`
 }
 
+// Client handles Slack emoji API calls.
 type Client struct {
 	token       string
 	cookie      string
@@ -25,6 +27,8 @@ type Client struct {
 	httpClient  *http.Client
 }
 
+// NewClient creates a Slack client. The cookie parameter should be the raw
+// cookie value (without the "d=" prefix).
 func NewClient(token, cookie, team string, delay time.Duration) *Client {
 	return &Client{
 		token:       token,
@@ -37,6 +41,8 @@ func NewClient(token, cookie, team string, delay time.Duration) *Client {
 	}
 }
 
+// UploadEmoji uploads an emoji image to Slack.
+// It retries automatically on rate limits with exponential backoff.
 func (c *Client) UploadEmoji(name string, imageData []byte, filename string) (*UploadResult, error) {
 	maxRetries := 5
 	backoff := c.baseBackoff
@@ -103,6 +109,7 @@ func (c *Client) doUpload(name string, imageData []byte, filename string) (*Uplo
 	return &result, nil
 }
 
+// Delay returns the configured delay between uploads.
 func (c *Client) Delay() time.Duration {
 	return c.delay
 }
