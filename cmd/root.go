@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/joho/godotenv"
 	"github.com/spf13/cobra"
@@ -26,7 +27,7 @@ func Execute() error {
 func init() {
 	cobra.OnInitialize(initConfig)
 	rootCmd.PersistentFlags().StringVar(&flagToken, "token", "", "Slack xoxc-* session token")
-	rootCmd.PersistentFlags().StringVar(&flagCookie, "cookie", "", "Slack d= session cookie")
+	rootCmd.PersistentFlags().StringVar(&flagCookie, "cookie", "", "Slack session cookie (the value of the 'd' cookie)")
 	rootCmd.PersistentFlags().StringVar(&flagTeam, "team", "", "Slack workspace subdomain")
 }
 
@@ -50,5 +51,7 @@ func resolveAuth() (token, cookie, team string, err error) {
 	if token == "" || cookie == "" || team == "" {
 		return "", "", "", fmt.Errorf("missing required auth: token, cookie, and team must be set via flags, env vars, or .env file")
 	}
+	// Strip "d=" prefix if user included it — the client adds it internally
+	cookie = strings.TrimPrefix(cookie, "d=")
 	return token, cookie, team, nil
 }

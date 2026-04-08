@@ -35,11 +35,6 @@ func init() {
 func runUpload(cmd *cobra.Command, args []string) error {
 	dir := args[0]
 
-	token, cookie, team, err := resolveAuth()
-	if err != nil {
-		return err
-	}
-
 	entries, err := walker.WalkDir(dir)
 	if err != nil {
 		return fmt.Errorf("walking directory: %w", err)
@@ -53,6 +48,22 @@ func runUpload(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return fmt.Errorf("loading state: %w", err)
 	}
+
+	if flagDryRun {
+		for _, entry := range entries {
+			if st.IsUploaded(entry.Path) {
+				continue
+			}
+			fmt.Printf("[dry-run] Would upload: %s → :%s:\n", entry.Path, entry.Name)
+		}
+		return nil
+	}
+
+	token, cookie, team, err := resolveAuth()
+	if err != nil {
+		return err
+	}
+
 	conflicts, err := state.LoadConflicts("emoji-conflicts.json")
 	if err != nil {
 		return fmt.Errorf("loading conflicts: %w", err)
@@ -65,11 +76,6 @@ func runUpload(cmd *cobra.Command, args []string) error {
 	for _, entry := range entries {
 		if st.IsUploaded(entry.Path) {
 			skipped++
-			continue
-		}
-
-		if flagDryRun {
-			fmt.Printf("[dry-run] Would upload: %s → :%s:\n", entry.Path, entry.Name)
 			continue
 		}
 

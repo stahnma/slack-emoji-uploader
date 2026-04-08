@@ -88,8 +88,12 @@ func runResolve(cmd *cobra.Command, args []string) error {
 			conflicts.Entries[filePath] = entry
 		}
 
-		st.Save()
-		conflicts.Save()
+		if err := st.Save(); err != nil {
+			return fmt.Errorf("saving state: %w", err)
+		}
+		if err := conflicts.Save(); err != nil {
+			return fmt.Errorf("saving conflicts: %w", err)
+		}
 		time.Sleep(client.Delay())
 	}
 
