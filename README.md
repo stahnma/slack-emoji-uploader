@@ -5,11 +5,12 @@ A CLI tool for bulk-uploading custom emoji to free-tier Slack workspaces. It use
 ## Features
 
 - Bulk upload emoji from a directory of image files
+- Automatic API token derivation -- only a browser cookie is needed
 - Idempotent state tracking -- safely resume interrupted uploads
 - Automatic numeric suffix for name conflicts (`--auto-suffix`)
 - Interactive conflict resolution via the `resolve` subcommand
 - Dry-run mode to preview what would be uploaded
-- Configurable rate limiting with delay between requests
+- Rate limit handling with automatic exponential backoff and retry
 
 ## Installation
 
@@ -106,14 +107,19 @@ slack-emoji-uploader resolve ./emoji/
 | `--auto-suffix` | upload | `false` | Append numeric suffix on name conflicts |
 | `--delay` | upload | `1s` | Delay between uploads (e.g., `2s`, `500ms`) |
 | `--dry-run` | upload | `false` | Show what would be uploaded without uploading |
+| `--verbose` | upload | `false` | Show detailed request/response info for debugging |
 
 ## How It Works
 
 This tool uploads emoji through Slack's undocumented `emoji.add` HTTP endpoint -- the same one the Slack web interface uses when you add a custom emoji from the browser. Because it does not use the paid Admin API (`admin.emoji.add`), it works on free-tier workspaces.
 
-Upload progress is tracked in `emoji-state.json` so that interrupted runs can be safely resumed. Conflicts (emoji names that already exist) are recorded in `emoji-conflicts.json` for later resolution.
+Upload progress is tracked in `emoji-state.json` so that interrupted runs can be safely resumed. Conflicts (emoji names that already exist) are recorded in `emoji-conflicts.json` for later resolution. On subsequent runs, both files are checked so that already-uploaded emoji and known conflicts are skipped without hitting the API.
+
+If Slack rate-limits a request, the tool automatically retries with exponential backoff (2s, 4s, 8s, ..., up to 60s). Retry progress is shown inline. If all retries are exhausted, the emoji is skipped and will be retried on the next run.
 
 ## Notes
 
 - Session cookies expire periodically. If you start getting authentication errors, re-extract your `d` cookie from the browser.
+- If you have `SLACK_TOKEN` set in your shell environment (e.g., for a Slack bot), it will take precedence over auto-derivation. Unset it (`unset SLACK_TOKEN`) or pass `--token ""` to use auto-derivation.
 - Be respectful of rate limits. The default 1-second delay between uploads is a reasonable starting point. Increasing the delay with `--delay` is recommended if you are uploading a large batch.
+- Use `--verbose` to see token/cookie details and full API responses when troubleshooting.
