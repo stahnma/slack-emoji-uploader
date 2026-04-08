@@ -1,3 +1,4 @@
+export CGO_ENABLED := 0
 BINARY := slack-emoji-uploader
 MODULE := github.com/stahnma/slack-emoji-uploader
 VERSION ?= $(shell git describe --tags --always --dirty 2>/dev/null || echo "dev")
