@@ -87,6 +87,7 @@ func runUpload(cmd *cobra.Command, args []string) error {
 		name := entry.Name
 		attempted := []string{}
 		success := false
+		isConflict := false
 
 		imageData, err := os.ReadFile(filepath.Join(dir, entry.Path))
 		if err != nil {
@@ -119,20 +120,27 @@ func runUpload(cmd *cobra.Command, args []string) error {
 
 			if result.Error == "error_name_taken" {
 				fmt.Printf("conflict (%s)\n", candidateName)
+				isConflict = true
 				if !flagAutoSuffix {
 					break
 				}
 				continue
 			}
 
+			if result.Error == "ratelimited" {
+				fmt.Println("rate limited (retries exhausted, will retry on next run)")
+				break
+			}
+
 			if result.Error == "not_authed" || result.Error == "invalid_auth" || result.Error == "token_revoked" {
 				return fmt.Errorf("authentication failed: %s — check your token and cookie", result.Error)
 			}
 
-			return fmt.Errorf("unexpected error uploading %s: %s", entry.Path, result.Error)
+			fmt.Printf("error: %s (will retry on next run)\n", result.Error)
+			break
 		}
 
-		if !success {
+		if !success && isConflict {
 			conflicts.RecordConflict(entry.Path, name, attempted)
 			if err := conflicts.Save(); err != nil {
 				return fmt.Errorf("saving conflicts: %w", err)
